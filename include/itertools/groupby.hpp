@@ -107,7 +107,7 @@ namespace itertools
     };
 
     template <typename T>
-    struct arg_returner
+    struct identity_fn
     {
         const T &operator()(const T &arg) const { return arg; }
     };
@@ -122,7 +122,7 @@ namespace itertools
     template <typename Iterator>
     auto groupby(Iterator first, Iterator last)
     {
-        using Fn = arg_returner<decltype(*first)>;
+        using Fn = identity_fn<decltype(*first)>;
         return groupby(first, last, Fn());
     }
 
