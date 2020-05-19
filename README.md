@@ -346,7 +346,9 @@ Unlink `dropwhile`, this one is authentic lazy-evaluation.
 
 Clone iterable.
 
-This is trivial in C++ since you can call `begin()` as many times as you like, but  actually quite challenging in Python! Either way, I include it for the sake of completeness.
+This is trivial in C++ since you can call `begin()` as many times as you like, but actually quite challenging in Python! In fact, in a discussion with my friend Romic, we found out that, of all itertools functions, `tee` is the easiest to implement in C++, but the hardest in Python!
+
+Either way, I include it for the sake of completeness.
 
 ### `zip`, `zip_longest`
 
