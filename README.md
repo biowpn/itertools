@@ -1,7 +1,7 @@
 
 # itertools
 
-Iterator building blocks for *fast* and *memory efficient* "iterator algebra". Requires C++17.
+***itertools*** provides iterator building blocks for *fast* and *memory efficient* "iterator algebra" in C++ (17 or later).
 
 ***itertools*** is inspired by Python's [itertools](https://docs.python.org/3.7/library/itertools.html) module, each method of which has been recast in a form suitable for C++:
 
@@ -31,17 +31,21 @@ and the following Python built-in functions:
 
 ## Installation
 
-***itertools*** is a header-only library, all the necessary files are in [include/itertools/](./include/itertools/). The [itertools.hpp](./include/itertools/itertools.hpp) is the header file that includes all the others.
+***itertools*** is a header-only library, all the necessary files are in [include/itertools/](./include/itertools/).
+
+The [itertools.hpp](./include/itertools/itertools.hpp) is the header file that includes all the others.
 
 ## Features
 
 ### 1. All Functions Work With `Iterable`
 
-An `Iterable` is just an object with member functions `begin()` and `end()`, both of which return an `Iterator` (to be specific, `ForwardIterator`; it needs only to have `operator++()`, `operator*()`, and `operator!=()`). This is analogous to Python's `iterable`. 
+An `Iterable` is just an object with member functions `begin()` and `end()`, both of which return an iterator (to be specific, *ForwardIterator*; it needs only  `operator++()`, `operator*()`, and `operator!=()`). `Iterable` is analogous to Python's `iterable`. 
 
-All `itertools` functions have overloads that accept one or more `Iterable`, and return a new `Iterable` **without copying elements** from the input `Iterable`(s); the returned `Iterable` is merely a "view".
+All ***itertools*** functions, where applicable, have overloads that accept one or more `Iterable`.
 
-***itertools*** provides a `range_view` class to wrap C arrays into an `Iterable`:
+All ***itertools*** functions return new `Iterable` (view, no copying elements).
+
+***itertools*** include a `range_view` class to wrap C arrays into an `Iterable`:
 
 ```
 int a[4];
@@ -53,7 +57,7 @@ for (auto i in itertools::range_view(a, a + 4))
 
 ### 2. Most Functions Work with Iterators
 
-Most `itertools` functions have overloads that accept `Iterator`s. For example:
+Most ***itertools*** functions have overloads that accept iterators. For example:
 
 ```
 std::vector<int> ints{1, 2, 3, 4};
@@ -65,15 +69,17 @@ itertools::cycle(ints.begin(), ints.end()); // also works
 
 This is closer to the flavor of existing STL algorithms.
 
-That some `itertools` functions do not have such overloads are merely due to my incapability. Any help here is greatly appreciated! See the [Limitations](#limitations) section for the list of them.
+That some ***itertools*** functions lack such overloads is due to my incapability. Any help here is greatly appreciated! See the [Limitations](#limitations) section for the list of them.
 
 ### 3. Memory Efficient
 
-`itertools` family operate iterators and **never** copy elements pointed to. They never allocate memory dynamically. Everything is done on a **lazy-evaluation** basis.
+***itertools*** operate iterators and **never** copy elements pointed to. The returned `Iterable` is merely a "view".
+
+***itertools*** never allocate memory dynamically. Everything is done on a **lazy-evaluation** basis.
 
 ### 4. Fast
 
-`itertools` family operate iterators. For most functions, all comparisions are done on iterators, **never** on the elements pointed to. This keeps dereferencing to a minimum.
+***itertools*** operate iterators. For most functions, all comparisions are done on iterators, **never** on the elements pointed to. This keeps dereferencing to a minimum.
 
 ## Usage
 
@@ -93,11 +99,6 @@ for (auto s : itertools::accumulate(numbers, 0))
 // 1 3 6 10 
 ```
 
-#### Complexity
-
-- Time: `O(n)`
-    - Each element is visited exactly once.
-- Space: `O(1)`
 
 ### `chain`
 
@@ -116,15 +117,6 @@ for (auto n : itertools::chain(numbers_vec, numbers_list))
 
 The requirement is that deferencing each iterable's `begin()` should yield the same type.
 
-#### Complexity
-
-- Time: `O(n * k^2)`
-    - `n` is the maximum length of the iterables
-    - `k` is the number of iterables
-    - total number of iterations is `O(n * k)`
-    - each iteration needs to check equality for up to `k` iterators
-- Space: `O(k)`
-    - each chain-iterator contains 1 sub chain-iterator
 
 ### `combinations`
 
@@ -143,16 +135,6 @@ for (auto &&[a, b] : itertools::combinations<2>(nums))
 ```
 
 Elements are treated as unique based on their position, not on their value.
-
-#### Complexity
-
-- Time: `O(n^k/(k-1)!)`
-    - `n` is the length of the iterable
-    - `k` is the length of combinations
-    - total number of combinations is `O(n^k/k!)`
-    - each iteration may invoke `rewind()`, which may visit up to `k` iterators
-- Space: `O(k)`
-    - each combination iterator contains 1 sub combination-iterator
 
 
 ### `combinations_with_replacement`
@@ -174,12 +156,6 @@ for (auto &&[a, b] : itertools::combinations_with_replacement<2>(nums))
 // 3 3
 ```
 
-#### Complexity
-
-- Time: `O(n^k/(k-1)!)`
-    - `n` is the length of the iterable
-    - `k` is the length of combinations
-- Space: `O(k)`
 
 ### `compress`
 
@@ -198,11 +174,6 @@ for (auto n : itertools::compress(nums, selected))
 
 Terminates when either iterable is exhausted.
 
-#### Complexity
-
-- Time: `O(n)`
-    - `n` is the maximum length of the two iterables
-- Space: `O(1)`
 
 ### `count`
 
@@ -216,9 +187,6 @@ for (auto n : itertools::count(1, 2))
 // will print 1 3 5 and so on, forever
 ```
 
-#### Complexity
-
-- Space: `O(1)`
 
 ### `cycle`
 
@@ -233,18 +201,21 @@ for (auto n : itertools::cycle(nums))
 // will print 1 2 3 1 2 3 1 2 3 and so on, forever
 ```
 
-#### Complexity
-
-- Space: `O(1)`
 
 ### `dropwhile`
 
 Drop items from the iterable while predicate(item) is true.
 
-#### Complexity
+```
+std::vector<int> nums{0, 0, 0, 1, 2, 3};
+for (auto n : itertools::dropwhile([](int n){ return n == 0; }, nums))
+{
+    std::cout << n << " ";
+}
+// will print:
+// 1 2 3 
+```
 
-- Time: `O(n)`
-- Space: `O(1)`
 
 ### `filter` , `filterfalse`
 
@@ -270,10 +241,6 @@ for (auto n : itertools::filterfalse(nums))
 // 0 0
 ```
 
-#### Complexity
-
-- Time: `O(n)`
-- Space: `O(1)`
 
 ### `groupby`
 
@@ -298,10 +265,6 @@ for (auto [k, g] : itertools::groupby(nums))
 
 Optional argument is a function to calculate key.
 
-#### Complexity
-
-- Time: `O(n)`
-- Space: `O(1)`
 
 ### `islice`
 
@@ -323,7 +286,7 @@ But, in theory, they can always be converted to the above case:
 
 - Get the length of the iterable, `N`;
 
-- For negative offsets `I`, take modulo of `N` to make them non-negative;
+- For negative offsets, take modulo of `N` to make them non-negative;
 
 - For `step < 0`, convert calls like
     ```
@@ -333,12 +296,8 @@ But, in theory, they can always be converted to the above case:
     ```
     islice(x.rbegin(), x.rend(), N - 1 - start, N - 1 - stop, -step)
     ```
-- `step = 0` causes infinite loop, so just use `repeat` instead. It is not allowed in Python either. 
+- `step = 0` causes infinite loop and it should be banned, which is the case in Python. 
 
-#### Complexity
-
-- Time: `O(n)`
-- Space: `O(1)`
 
 ### `permutations`
 
@@ -361,16 +320,6 @@ for (auto &&[a, b] : itertools::permutations<2>(nums))
 
 Elements are treated as unique based on their position, not on their value.
 
-#### Complexity
-
-- Time: `O(n^(k+1) * k)`
-    - `n` is the length of the iterable
-    - `k` is the length of permutations
-    - total number of permutations is `O(n^k)`
-    - each iteration may trigger `repeated()` for up to `n` times
-    - each `repeated()` call may visit up to `k` iterator
-- Space: `O(3^k)`
-    - each permutations-iterator contains 3 sub permutations-iterators
 
 ### `product`
 
@@ -392,15 +341,6 @@ for (auto [x, y] : itertools::product(X, Y))
 // 3 B
 ```
 
-#### Complexity
-
-- Time: `O(n^k * k)`
-    - `n` is the maximum length of the iterables
-    - `k` is the number of iterables
-    - total number of product tuples is `O(n^k)`
-    - each iteration may visit up to `k` iterators to check for sub product-iterator equality
-- Space: `O(3^k)`
-    - each product-iterator contains 3 sub product-iterators
 
 ### `repeat`
 
@@ -414,9 +354,6 @@ for (auto&& message : itertools::repeat("Hello there"))
 // will print "Hello there" forever
 ```
 
-#### Complexity
-
-- Space: `O(1)`
 
 ### `starmap`
 
@@ -431,33 +368,38 @@ for (auto res : itertools::starmap(my_pow /* pow(a, b) */, args))
 // will print: 32 9 1000 
 ```
 
-#### Complexity
-
-- Time: `O(n)`
-- Space: `O(1)`
 
 ### `takewhile`
 
-Like `dropwhile`, but take items from the iterable while predicate(item) is true.
+Opposite of `dropwhile`: take items from the iterable while predicate(item) is true.
 
-#### Complexity
-
-- Time: `O(n)`
-- Space: `O(1)`
+```
+std::vector<int> nums{0, 0, 0, 1, 2, 3};
+for (auto n : itertools::takewhile([](int n){ return n == 0; }, nums))
+{
+    std::cout << n << " ";
+}
+// will print:
+// 0 0 0
+```
 
 ### `tee`
 
 Clone iterable.
 
-This is trivial in C++ since you can call `begin()` as many times as you like, but actually quite challenging in Python! In fact, in a discussion with my friend Romic, we found out that, of all itertools functions, `tee` is the easiest to implement in C++, but the hardest in Python!
+```
+std::vector<int> nums{1, 2, 3};
 
-Either way, I include it for the sake of completeness.
+auto [nums1, nums2] = itertools::tee<2>(nums);
 
-#### Complexity
+std::equal(nums1.begin(), nums1.end(), nums.begin()); // true
+std::equal(nums2.begin(), nums2.end(), nums.begin()); // true
+```
 
-- Time: `O(1)`
-- Space: `O(k)`
-    - `k` is the number of clones
+This is trivial in C++ since you can call `begin()` as many times as you like, but actually quite challenging in Python! In fact, in a discussion with my friend Romic, we found out that, of all itertools functions, `tee` is the easiest to implement in C++, but the hardest in Python.
+
+I include it for the sake of completeness.
+
 
 ### `zip`, `zip_longest`
 
@@ -491,17 +433,6 @@ for (auto [n, c] : itertools::zip_longest(ints, letters))
 // 0 D
 ```
 
-Note: Python's `zip_longest()` accepts an optional `fillvalue` argument to specify the filled-in value, but it applies to any iterable. In C++ you can't do it if the input iterables' elements can't be converted to one another. To be really generic, it needs `fillvalue` for each iterable. In the end I didn't implement such feature because it is out of my ability.
-
-#### Complexity
-
-- Time: `O(n * k)`
-    - `n` is the maximum length of the iterables
-    - `k` is the number of iterables
-    - each iteration may need to check equality for up to `k` iterators
-- Space: `O(k)`
-    - each zip-iterator only contains 1 sub zip-itereator
-
 
 ## Limitations
 
@@ -517,4 +448,4 @@ Note: Python's `zip_longest()` accepts an optional `fillvalue` argument to speci
 
 - `islice` accepts only non-negative offsets and positive steps.
 
-- `zip_longest` cannot specify `fillvalue`.
+- `zip_longest` cannot specify `fillvalue`, unlike Python's counterpart. The `fillvalue` argument in Python applies to any iterable. In C++ you can't do it if the input iterables' elements can't be converted to one another. To be really generic, it needs `fillvalue` for each iterable. In the end I didn't implement such feature because it is out of my ability.
