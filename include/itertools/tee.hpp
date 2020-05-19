@@ -56,7 +56,7 @@ namespace itertools
     template <unsigned N, typename Iterator>
     auto tee(Iterator first, Iterator last)
     {
-        return duplicator<N, Iterator>().get(first);
+        return duplicator<N, Iterator>().get(range_view<Iterator>(first, last));
     }
 
     template <unsigned N, typename Iterable>
