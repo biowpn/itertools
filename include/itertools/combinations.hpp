@@ -52,7 +52,10 @@ namespace itertools
             _M_it = it;
         }
 
-        bool exhausted() const { return _M_it == _M_it_last; }
+        bool exhausted() const
+        {
+            return _M_it == _M_it_last;
+        }
 
         decltype(auto) operator*() const
         {
@@ -147,7 +150,7 @@ namespace itertools
     }
 
     template <std::size_t N, typename Iterable>
-    auto combinations(Iterable&& iterable)
+    auto combinations(Iterable &&iterable)
     {
         return combinations<N>(iterable.begin(), iterable.end());
     }
