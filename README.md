@@ -5,29 +5,29 @@ Iterator building blocks for *fast* and *memory efficient* "iterator algebra". R
 
 ***itertools*** is inspired by Python's [itertools](https://docs.python.org/3.7/library/itertools.html) module, each method of which has been recast in a form suitable for C++:
 
-- `accumulate`
-- `chain`
-- `combinations`
-- `combinations_with_replacement`
-- `compress`
-- `count`
-- `cycle`
-- `dropwhile`
-- `filterfalse`
-- `groupby`
-- `islice`
-- `permutations`
-- `product`
-- `repeat`
-- `starmap`
-- `takewhile`
-- `tee`
-- `zip_longest`
+- [`accumulate`](#accumulate)
+- [`chain`](#chain)
+- [`combinations`](#combinations)
+- [`combinations_with_replacement`](#combinations_with_replacement)
+- [`compress`](#compress)
+- [`count`](#count)
+- [`cycle`](#cycle)
+- [`dropwhile`](#dropwhile)
+- [`filterfalse`](#filter-filterfalse)
+- [`groupby`](#groupby)
+- [`islice`](#islice)
+- [`permutations`](#permutations)
+- [`product`](#product)
+- [`repeat`](#repeat)
+- [`starmap`](#starmap)
+- [`takewhile`](#takewhile)
+- [`tee`](#tee)
+- [`zip_longest`](#zip-zip_longest)
 
-As well as the following Python built-in functions:
+and the following Python built-in functions:
 
-- `filter`
-- `zip`
+- [`filter`](#filter--filterfalse)
+- [`zip`](#zip-zip_longest)
 
 ## Installation
 
