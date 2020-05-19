@@ -21,9 +21,9 @@
 /**
  * @file combinations.hpp
  *
- *  Return successive r-length combinations_impl of elements in the iterable.
+ *  Return successive r-length combinations of elements in the iterable.
  *
- *  combinations(iterable(4), 3) --> (0,1,2), (0,1,3), (0,2,3), (1,2,3)
+ *  combinations(range(4), 3) --> (0,1,2), (0,1,3), (0,2,3), (1,2,3)
  */
 
 #pragma once
@@ -144,6 +144,12 @@ namespace itertools
         }
         Iterator it = std::next(first, 1 + length - N);
         return range_view(comb_it_t(first, it), comb_it_t(it, it));
+    }
+
+    template <std::size_t N, typename Iterable>
+    auto combinations(Iterable&& iterable)
+    {
+        return combinations<N>(iterable.begin(), iterable.end());
     }
 
 } // namespace itertools
