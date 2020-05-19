@@ -39,13 +39,16 @@ As well as the following Python built-in functions:
 
 An `Iterable` is just an object with member functions `begin()` and `end()`, both of which return an `Iterator` (to be specific, `ForwardIterator`; it needs only to have `operator++()`, `operator*()`, and `operator!=()`). This is analogous to Python's `iterable`. 
 
-All `itertools` functions have overloads that accept one or more `Iterable`, and return a new `Iterable` **without copying elements** from the input `Iterable`(s); the new `Iterable`s are merely "views".
+All `itertools` functions have overloads that accept one or more `Iterable`, and return a new `Iterable` **without copying elements** from the input `Iterable`(s); the returned `Iterable` is merely a "view".
 
 ***itertools*** provides a `range_view` class to wrap C arrays into an `Iterable`:
 
 ```
 int a[4];
-for (auto i in itertools::range_view(a, a + 4)) { //... }
+for (auto i in itertools::range_view(a, a + 4))
+{
+    //...
+}
 ```
 
 ### 2. Most Functions Work with Iterators
@@ -62,15 +65,15 @@ itertools::cycle(ints.begin(), ints.end()); // also works
 
 This is closer to the flavor of existing STL algorithms.
 
-That some `itertools` functions do not have such overloads are merely due to my incapability to implement one for them.
+That some `itertools` functions do not have such overloads are merely due to my incapability. Any help here is greatly appreciated! See the [Limitations](#limitations) section for the list of them.
 
 ### 3. Memory Efficient
 
-`itertools` family operate with iterators and **never** copy elements pointed to. They never allocate memory dynamically. Everything is done on an **lazy-evaluation** basis.
+`itertools` family operate iterators and **never** copy elements pointed to. They never allocate memory dynamically. Everything is done on a **lazy-evaluation** basis.
 
 ### 4. Fast
 
-`itertools` family operate with iterators. All comparisions are done on them, **never** on the elements pointed to. This keeps dereferencing to a minimum (in fact, dereferencing only happens when the user specifically needs so).
+`itertools` family operate iterators. All comparisions are done on iterators, **never** on the elements pointed to. This keeps dereferencing to a minimum (in fact, dereferencing only occurs when user specifically requires so).
 
 ## Usage
 
@@ -78,7 +81,7 @@ That some `itertools` functions do not have such overloads are merely due to my 
 
 Returns accumulated sums or results of binary functions.
 
-It differs from `std::accumulate` in that it provides intermediate results, instead of just the final one:
+It differs from `std::accumulate` in that it provides intermediate results:
 
 ```
 std::vector<int> numbers{1, 2, 3, 4};
@@ -109,7 +112,7 @@ The requirement is that deferencing each iterable's `begin()` should yield the s
 
 ### `combinations`
 
-Return successive fixed-length combinations of elements in the input iterable.
+Return successive fixed-length combinations of elements in the iterable.
 
 ```
 std::vector<int> nums{1, 2, 3};
@@ -128,7 +131,7 @@ Elements are treated as unique based on their position, not on their value.
 
 ### `combinations_with_replacement`
 
-Return successive fixed-length combinations with replacement of elements in the input iterable.
+Return successive fixed-length combinations with replacement of elements in the iterable.
 
 ```
 std::vector<int> nums{1, 2, 3};
@@ -160,7 +163,7 @@ for (auto n : itertools::compress(nums, selected))
 // 2 4 
 ```
 
-Terminates when either iterable ends.
+Terminates when either iterable is exhausted.
 
 ### `count`
 
@@ -191,11 +194,11 @@ for (auto n : itertools::cycle(nums))
 
 Drop items from the iterable while predicate(item) is true.
 
-Side note: this is the only function where it may not be 100% "lazy-evaluated".
-
 ### `filter` , `filterfalse`
 
-Return items for which function(item) is true (false for `filterfalse`). If function is None, return the items that are true (false for `filterfalse`).
+Return items for which function(item) is true (false for `filterfalse`).
+
+If function is None, return the items that are true (false for `filterfalse`).
 
 ```
 std::vector<int> nums{1, 0, -1, 0, 1};
@@ -240,7 +243,7 @@ Optional argument is a function to calculate key.
 
 ### `islice`
 
-Slice an iterable by starting offset, ending offset, and step.
+Slice an iterable by starting offset, stopping offset, and step.
 
 ```
 std::string str{"ABCDEFG"};
@@ -252,15 +255,15 @@ for (auto c : itertools::islice(str, 1, 7, 2))
 // B D F
 ```
 
-Limitations: only non-negative indices and and positive steps are allowed.
+Limitations: only non-negative offsets and and positive steps are allowed.
 
 But, in theory, they can always be converted to the above case:
 
 - Get the length of the iterable, `N`;
 
-- For negative indices `I`, take modulo of `N` to make them non-negative;
+- For negative offsets `I`, take modulo of `N` to make them non-negative;
 
-- For negative steps `step`, convert calls like
+- For `step < 0`, convert calls like
     ```
     islice(x.begin(), x.end(), start, stop, step)
     ```
@@ -340,8 +343,6 @@ for (auto res : itertools::starmap(my_pow /* pow(a, b) */, args))
 
 Like `dropwhile`, but take items from the iterable while predicate(item) is true.
 
-Unlink `dropwhile`, this one is authentic lazy-evaluation.
-
 ### `tee`
 
 Clone iterable.
@@ -356,7 +357,7 @@ Combine multiple iterables by glueing their iterators, so that they advance toge
 
 For `zip`, it terminates when one of the iterables is exhausted. 
 
-For `zip_longest`, it terminates when all iterables are exhausted. Those that terminate early will be filled-in with default value of their respective value type.
+For `zip_longest`, it terminates when all iterables are exhausted. Those that terminate earlier will be filled-in with default value of their respective value type.
 
 ```
 std::vector<int> ints{1, 2, 3};
@@ -384,3 +385,19 @@ for (auto [n, c] : itertools::zip_longest(ints, letters))
 
 Note: Python's `zip_longest()` accepts an optional `fillvalue` argument to specify the filled-in value, but it applies to any iterable. In C++ you can't do it if the input iterables' elements can't be converted to one another. To be really generic, it needs `fillvalue` for each iterable. In the end I didn't implement such feature because it is out of my ability.
 
+
+## Limitations
+
+- These functions do not have overloads that accept iterators:
+
+  - `chain`
+  - `combinations`
+  - `combinations_with_replacement`
+  - `permutations`
+  - `product`
+  - `zip`
+  - `zip_longest`
+
+- `islice` accepts only non-negative offsets and positive steps.
+
+- `zip_longest` cannot specify `fillvalue`.
